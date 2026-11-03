@@ -79,3 +79,24 @@ def test_delta_values_are_correct():
     assert abs(diff.delta - (-0.2)) < 0.001
     assert abs(diff.baseline_mean - 1.0) < 0.001
     assert abs(diff.candidate_mean - 0.8) < 0.001
+
+def test_comparison_rejects_missing_cases():
+    import pytest
+    engine = RegressionEngine()
+    engine.score_repo = MockScoreRepo({
+        "run_a": _make_scores("run_a", "json_validity", [1.0, 1.0]),
+        "run_b": _make_scores("run_b", "json_validity", [1.0]),
+    })
+    with pytest.raises(ValueError, match="identical case IDs"):
+        engine.compare("run_a", "run_b")
+
+
+def test_comparison_rejects_missing_evaluators():
+    import pytest
+    engine = RegressionEngine()
+    engine.score_repo = MockScoreRepo({
+        "run_a": _make_scores("run_a", "json_validity", [1.0]),
+        "run_b": _make_scores("run_b", "field_match", [1.0]),
+    })
+    with pytest.raises(ValueError, match="identical case IDs"):
+        engine.compare("run_a", "run_b")
