@@ -34,18 +34,13 @@ class AnthropicClient(LLMClient):
         system_prompt: Optional[str] = None,
     ) -> LLMResponse:
         resolved_params = params or self.params
-
-        # Constrói kwargs opcionais — a API Anthropic aceita 'system' como argumento separado
-        extra = {}
-        if system_prompt and system_prompt.strip():
-            extra["system"] = system_prompt
+        # The current Messages API does not accept temperature; omit unsupported parameters.
 
         try:
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=resolved_params.get("max_tokens", 512),
                 messages=[{"role": "user", "content": prompt}],
-                temperature=resolved_params.get("temperature", 0.0),
                 system=system_prompt if system_prompt and system_prompt.strip() else Omit(),
             )
         except Exception as e:
