@@ -1,5 +1,5 @@
 """Missing or failed evaluators must not be treated as a successful run."""
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from promptforge.core.pipeline import EvalPipeline
