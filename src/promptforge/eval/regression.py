@@ -51,6 +51,14 @@ class RegressionEngine:
         baseline_scores = self.score_repo.get_by_run(baseline_run_id)
         candidate_scores = self.score_repo.get_by_run(candidate_run_id)
 
+        if not baseline_scores or not candidate_scores:
+            raise ValueError("Cannot compare empty evaluation runs")
+
+        baseline_cases = {(s["case_id"], s["evaluator"]) for s in baseline_scores}
+        candidate_cases = {(s["case_id"], s["evaluator"]) for s in candidate_scores}
+        if baseline_cases != candidate_cases:
+            raise ValueError("Regression runs must have identical case IDs and evaluators")
+
         baseline_agg = aggregate_run_scores(baseline_scores)
         candidate_agg = aggregate_run_scores(candidate_scores)
 

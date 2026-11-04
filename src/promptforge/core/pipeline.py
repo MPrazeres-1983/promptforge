@@ -128,10 +128,7 @@ class EvalPipeline:
             if ev_conf.type == "heuristic":
                 fn = _resolve_heuristic(ev_conf.name)
                 if fn is None:
-                    self.console.print(
-                        f"[yellow]⚠ Unknown heuristic evaluator: '{ev_conf.name}'. Skipping.[/yellow]"
-                    )
-                    continue
+                    raise ValueError(f"Unknown heuristic evaluator: {ev_conf.name}")
                 score, rationale = fn(
                     output_raw=output_raw,
                     output_parsed=output_parsed,
@@ -149,10 +146,7 @@ class EvalPipeline:
 
                     rubric_path = ev_conf.config.get("rubric")
                     if not rubric_path:
-                        self.console.print(
-                            f"[yellow]⚠ Judge '{ev_conf.name}' não tem 'rubric' definida no config. Skipping.[/yellow]"
-                        )
-                        continue
+                        raise ValueError(f"Judge {ev_conf.name} requires a rubric")
 
                     rubric = Rubric.from_yaml(rubric_path)
                     judge_scores = judge_output(
@@ -184,14 +178,10 @@ class EvalPipeline:
                         results.append((evaluator_name, round(normalized, 4), rationale))
 
                 except Exception as e:
-                    self.console.print(
-                        f"[red]✗ Judge '{ev_conf.name}' falhou: {e}[/red]"
-                    )
+                    raise RuntimeError(f"Judge evaluator {ev_conf.name} failed") from e
 
             else:
-                self.console.print(
-                    f"[yellow]⚠ Tipo de evaluador desconhecido: '{ev_conf.type}'. Skipping.[/yellow]"
-                )
+                raise ValueError(f"Unknown evaluator type: {ev_conf.type}")
 
         return results
 
